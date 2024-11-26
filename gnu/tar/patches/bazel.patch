@@ -1,0 +1,313 @@
+diff --git a/BUILD.bazel b/BUILD.bazel
+new file mode 100644
+index 0000000..f4c2af7
+--- /dev/null
++++ b/BUILD.bazel
+@@ -0,0 +1 @@
++load("@rules_cc//cc:defs.bzl", "cc_binary")
+diff --git a/MODULE.bazel b/MODULE.bazel
+new file mode 100644
+index 0000000..18cc9f1
+--- /dev/null
++++ b/MODULE.bazel
+@@ -0,0 +1,8 @@
++module(
++    name = "tar",
++    version = "v1.35",
++    compatibility_level = 1,
++)
++
++bazel_dep(name = "rules_cc", version = "0.0.9")
++bazel_dep(name = "platforms", version = "0.0.8")
+diff --git a/config/BUILD.bazel b/config/BUILD.bazel
+new file mode 100644
+index 0000000..e923a9c
+--- /dev/null
++++ b/config/BUILD.bazel
+@@ -0,0 +1,11 @@
++load("@rules_cc//cc:defs.bzl", "cc_library")
++
++
++cc_library(
++    name = "config",
++    hdrs = ["config.h"],
++    defines = [
++        "HAVE_CONFIG_H",
++    ],
++    visibility = ["//visibility:public"],
++)
+\ No newline at end of file
+diff --git a/gnu/BUILD.bazel b/gnu/BUILD.bazel
+new file mode 100644
+index 0000000..943e9d0
+--- /dev/null
++++ b/gnu/BUILD.bazel
+@@ -0,0 +1,223 @@
++load("@rules_cc//cc:defs.bzl", "cc_library")
++
++# cd gnu
++# ls *.in.h | awk '{gsub(".in.h$", ".h"); gsub("se-", "selinux/"); gsub("sys_", "sys/"); print $1}' | xargs make $1
++# make configmake.h malloc/scratch_buffer.gl.h malloc/dynarray.gl.h malloc/dynarray-skeleton.gl.h malloc/scratch_buffer.gl.h
++cc_library(
++    name = "selinux",
++    hdrs = glob(["selinux/*.h"]),
++)
++
++cc_library(
++    name = "sys",
++    hdrs = glob(["sys/*.h"]),
++)
++
++cc_library(
++    name = "malloc",
++    srcs = glob(
++        ["malloc/*.c"],
++        exclude = ["malloc/dynarray-skeleton.c"],
++    ),
++    hdrs = glob([
++        "malloc/*.h",
++    ]) + [
++        "cdefs.h",
++        "intprops-internal.h",
++        "libc-config.h",
++        "malloc/dynarray-skeleton.c",
++        "stdckdint.h",
++        "stddef.h",
++    ],
++    includes = [
++        ".",
++        "../config",
++        "./malloc",
++    ],
++    visibility = ["//visibility:public"],
++    deps = [
++        "//config",
++    ],
++)
++
++# make uniwidth.h
++cc_library(
++    name = "uniwidth",
++    srcs = glob(["uniwidth/*.c"]),
++    hdrs = glob([
++        "uniwidth/*.h",
++        "uniwidth.h",
++        "streq.h",
++        "unitypes.h",
++    ]),
++    includes = [
++        ".",
++        "../config",
++    ],
++    visibility = ["//visibility:public"],
++    deps = [
++        ":unictype",
++        "//config",
++    ],
++)
++
++# make unicase.h
++cc_library(
++    name = "unicase",
++    srcs = glob(["unicase/*.c"]),
++    hdrs = glob([
++        "unicase/*.h",
++        "unicase.h",
++        "uninorm.h",
++        "unitypes.h",
++    ]),
++    includes = [
++        ".",
++        "../config",
++    ],
++    visibility = ["//visibility:public"],
++    deps = [
++        "//config",
++    ],
++)
++
++# make unictype.h
++cc_library(
++    name = "unictype",
++    srcs = glob(["unictype/*.c"]),
++    hdrs = glob([
++        "unictype/*.h",
++    ]) + [
++        "unictype.h",
++        "unitypes.h",
++    ],
++    includes = [
++        ".",
++        "../config",
++    ],
++    visibility = ["//visibility:public"],
++    deps = [
++        "//config",
++    ],
++)
++
++cc_library(
++    name = "gnu",
++    srcs = glob(
++        ["*.c"],
++        exclude = [
++            "btowc.c",
++            "chmod.c",
++            "fchown-stub.c",
++            "close.c",
++            "closedir.c",
++            "dirfd.c",
++            "dup.c",
++            "dup2.c",
++            "fchdir.c",
++            "fchmodat.c",
++            "fcntl.c",
++            "fdopendir.c",
++            "fileblocks.c",
++            "float.c",
++            "itold.c",
++            "fstat.c",
++            "getcwd.c",
++            "getcwd-lgpl.c",
++            "getdtablesize.c",
++            "getline.c",
++            "getpagesize.c",
++            "getprogname.c",
++            "gettimeofday.c",
++            "isblank.c",
++            "iswblank.c",
++            "iswdigit.c",
++            "iswxdigit.c",
++            "lchmod.c",
++            "localeconv.c",
++            "lseek.c",
++            "mbrtowc.c",
++            "mbsinit.c",
++            "mbsrtowcs.c",
++            "mbtowc.c",
++            "memchr.c",
++            "mkdir.c",
++            "mkdirat.c",
++            "mkdtemp.c",
++            "mkfifoat.c",
++            "mknodat.c",
++            "msvc-inval.c",
++            "msvc-nothrow.c",
++            "nl_langinfo-lock.c",
++            "opendir.c",
++            "pipe.c",
++            "raise.c",
++            "read.c",
++            "readdir.c",
++            "rewinddir.c",
++            "rmdir.c",
++            "rpmatch.c",
++            "getfilecon.c",
++            "setenv.c",
++            "sleep.c",
++            "stdio-read.c",
++            "stdio-write.c",
++            "stpcpy.c",
++            "strcasecmp.c",
++            "strncasecmp.c",
++            "strdup.c",
++            "strndup.c",
++            "strnlen.c",
++            "strtoimax.c",
++            "strtoumax.c",
++            "time_r.c",
++            "tzset.c",
++            "unsetenv.c",
++            "wcrtomb.c",
++            "wmemchr.c",
++            "write.c",
++            # 
++            "anytostr.c",
++            "fnmatch_loop.c",
++            "regex_internal.c",
++            "regcomp.c",
++            "snprintf.c",
++            "vsnprintf.c",
++            "at-func.c",
++            "regexec.c",
++        ],
++    ),
++    hdrs = glob(
++        ["*.h"],
++        exclude = ["*.in.h", "dynarray.h"],
++    ) + [
++        "anytostr.c",
++        "at-func.c",
++        "fnmatch_loop.c",
++        "full-write.c",
++        "nstrftime.c",
++        "regex_internal.c",
++        "xstrtol.c",
++        "regcomp.c",
++        "safe-read.c",
++        "regexec.c",
++        "strtoul.c",
++        "strtol.c",
++    ],
++    includes = [
++        "../config",
++    ],
++    copts = [
++        "-include", "../config/config.h"
++    ],
++    visibility = ["//visibility:public"],
++    deps = [
++        ":malloc",
++        ":selinux",
++        ":sys",
++        ":unicase",
++        ":unictype",
++        ":uniwidth",
++        "//config",
++    ],
++)
+diff --git a/lib/BUILD.bazel b/lib/BUILD.bazel
+new file mode 100644
+index 0000000..a6dc815
+--- /dev/null
++++ b/lib/BUILD.bazel
+@@ -0,0 +1,15 @@
++load("@rules_cc//cc:defs.bzl", "cc_library")
++
++# lib
++# make rmt-command.h
++cc_library(
++    name = "lib",
++    hdrs = glob(["*.h"]),
++    srcs = glob(["*.c"]),
++    includes = ["../config", ".", "../gnu"],
++    deps = [
++        "//config",
++        "//gnu"
++    ],
++    visibility = ["//visibility:public"]
++)
+\ No newline at end of file
+diff --git a/src/BUILD.bazel b/src/BUILD.bazel
+new file mode 100644
+index 0000000..b0308b5
+--- /dev/null
++++ b/src/BUILD.bazel
+@@ -0,0 +1,17 @@
++load("@rules_cc//cc:defs.bzl", "cc_binary")
++
++cc_binary(
++    name = "tar",
++    srcs = glob(["*.c", "*.h"]),
++    includes = [
++        "../config", 
++        "../gnu",
++        "../lib",
++        "."
++    ],
++    deps = [
++        "//config",
++        "//gnu",
++        "//lib"
++    ]
++)

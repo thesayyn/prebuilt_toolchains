@@ -1,0 +1,6 @@
+common --enable_platform_specific_config
+startup --windows_enable_symlinks
+
+common:windows --extra_toolchains=@local_config_cc//:cc-toolchain-x64_windows_mingw
+common:windows --extra_execution_platforms=@gawk//:x64_windows-mingw64-gcc
+common:windows --enable_runfiles
