@@ -1,0 +1,32 @@
+module(
+    name = "gnutar",
+    version = "v1.35",
+    compatibility_level = 1,
+)
+
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
+bazel_dep(name = "aspect_bazel_lib", version = "2.9.4")
+bazel_dep(name = "rules_cc", version = "0.0.9")
+bazel_dep(name = "platforms", version = "0.0.8")
+bazel_dep(name = "toolchains_musl", version = "0.1.20")
+
+toolchains_musl = use_extension("@toolchains_musl//:toolchains_musl.bzl", "toolchains_musl")
+use_repo(toolchains_musl, "musl_toolchains_hub")
+
+register_toolchains("@musl_toolchains_hub//:all")
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+http_archive(
+    name = "tar",
+    integrity = "sha256-TWL/NzQux67XSFNTI5MMfPlKz3HDWRiCsmp+pQ8+3BY=",
+    strip_prefix = "tar-1.35",
+    urls =  [
+        "https://ftp.gnu.org/gnu/tar/tar-1.35.tar.xz",
+    ],
+    patches = [
+        "//patches:bazel.patch",
+    ],
+    patch_args = [
+        "-p1"
+    ],
+)

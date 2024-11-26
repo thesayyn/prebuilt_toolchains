@@ -1,0 +1,60 @@
+name: Build GNU
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+
+jobs:
+  awk:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: gnu/awk
+    steps:
+      - uses: msys2/setup-msys2@v2
+        if: matrix.os == 'windows-latest'
+        with:
+          # GAWK only builds on mingw64.
+          msystem: mingw64
+          install: >-
+            mingw-w64-x86_64-toolchain
+      - uses: actions/checkout@v2
+      - uses: bazel-contrib/setup-bazel@0.9.1
+        with:
+          # Avoid downloading Bazel every time.
+          bazelisk-cache: true
+          # Store build cache per workflow.
+          disk-cache: ${{ github.workflow }}
+          # Share repository cache between workflows.
+          repository-cache: true
+      - run: bazel build @gawk//:gawk
+      - run: bazel run @gawk//:gawk -- '{ print $2 }' <<< "hello there :)"
+
+  tar:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+        run:
+          working-directory: gnu/tar
+    steps:
+        - uses: actions/checkout@v2
+        - uses: bazel-contrib/setup-bazel@0.9.1
+          with:
+            # Avoid downloading Bazel every time.
+            bazelisk-cache: true
+            # Store build cache per workflow.
+            disk-cache: ${{ github.workflow }}
+            # Share repository cache between workflows.
+            repository-cache: true
+        - run: bazel build @tar//src:tar
+        - run: bazel run @tar//src:tar -- --help
+        
+        
