@@ -1,0 +1,11 @@
+"windows toolchains"
+
+module(
+    name = "toolchains_windows", 
+    version = "0.0.0", 
+    compatibility_level = 1
+)
+
+bazel_dep(name = "platforms", version = "0.0.8")
+
+register_toolchains("//:all")
