@@ -1,0 +1,19 @@
+module(
+    name = "toolchains_macos",
+    version = "0.0.0",
+    compatibility_level = 1,
+)
+
+bazel_dep(name = "aspect_bazel_lib", version = "2.9.4")
+bazel_dep(name = "rules_cc", version = "0.1.0")
+
+toolchains = use_extension("@aspect_bazel_lib//lib:extensions.bzl", "toolchains")
+toolchains.tar()
+use_repo(toolchains, "bsd_tar_toolchains")
+
+sysroot = use_extension(":sysroot.bzl", "sysroot")
+sysroot.darwin(
+    name = "darwin_sdk_14",
+    version = "14.4"
+)
+use_repo(sysroot, "darwin_sdk_14")
